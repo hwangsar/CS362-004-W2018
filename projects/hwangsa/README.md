@@ -1,1 +1,1 @@
-Sarah Hwang hwangsa
+This is my assignment-1 submission!
