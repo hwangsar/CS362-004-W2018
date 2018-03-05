@@ -670,9 +670,9 @@ void adventurer_rf(int currentPlayer, int temphand[], int z, struct gameState *s
 }
 
 void smithy_rf(int currentPlayer, int handPos, struct gameState *state){
-	//*BUG - +4 cards (usually only 3)
+	//***THIS BUG HAS BEEN FIXED *BUG - +4 cards (usually only 3)
 	int i;
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 3; i++)
 	{
 		drawCard(currentPlayer, state);
 	}
