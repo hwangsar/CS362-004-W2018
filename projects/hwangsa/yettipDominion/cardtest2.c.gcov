@@ -1,0 +1,105 @@
+        -:    0:Source:cardtest2.c
+        -:    0:Graph:cardtest2.gcno
+        -:    0:Data:cardtest2.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include "dominion.h"
+        -:    2:#include "dominion_helpers.h"
+        -:    3:#include "rngs.h"
+        -:    4:#include <string.h>
+        -:    5:#include <stdio.h>
+        -:    6:#include <assert.h>
+        -:    7:
+        -:    8:int failure_count = 0;
+        -:    9:
+       17:   10:void assertTrue(int a, int b) {
+       17:   11:	if (a == b) {
+       14:   12:		printf("Test: Pass\n");
+        -:   13:	}
+        -:   14:	else {
+        3:   15:		printf("Test: Fail\n");
+        3:   16:		failure_count++;
+        -:   17:	}
+       17:   18:}
+        -:   19:
+        1:   20:int main() {
+        -:   21:	int i;
+        1:   22:	int treasure_count = 0;
+        1:   23:	int og_treasure_count = 0;
+        1:   24:	int num_players = 2;
+        1:   25:	int player_0 = 0;
+        1:   26:	int player_1 = 1;
+        -:   27:	int card;
+        1:   28:	int hand_pos = 0;
+        1:   29:	int choice1 = 0, choice2 = 0, choice3 = 0;
+        1:   30:	int bonus = 0;
+        -:   31:
+        -:   32:	// kingdom cards
+        1:   33:	int k[10] = {adventurer, council_room, feast, gardens, mine, remodel, smithy, village, baron, great_hall};
+        1:   34:	int seed = 2000;
+        -:   35:
+        -:   36:	// game states
+        -:   37:	struct gameState state, og_state;
+        -:   38:
+        1:   39:	printf("Testing: adventurerCard()\n");
+        1:   40:	memset(&state,23,sizeof(struct gameState));
+        1:   41:	memset(&og_state,23,sizeof(struct gameState));
+        -:   42:	
+        1:   43:	initializeGame(num_players, k, seed, &state);
+        -:   44:	// copy to preserve
+        1:   45:	memcpy(&og_state, &state, sizeof(struct gameState));
+        -:   46:
+        1:   47:	cardEffect(adventurer, choice1, choice2, choice3, &state, hand_pos, &bonus);
+        -:   48:
+        1:   49:	printf("\nPlayer_0 gains 2 cards\n");
+        1:   50:	assertTrue(state.handCount[player_0],og_state.handCount[player_0]+2);
+        -:   51:
+        -:   52:	// check treasure gain
+        9:   53:	for (i = 0; i < state.handCount[player_0]; i++) {
+        8:   54:		card = state.hand[player_0][i];
+        8:   55:		if (card == copper || card == silver || card == gold) {
+        7:   56:			treasure_count++;
+        -:   57:		}
+        -:   58:	}
+        -:   59:
+        -:   60:	// check default treasure count
+        6:   61:	for (i = 0; i < og_state.handCount[player_0]; i++) {
+        5:   62:		card = og_state.hand[player_0][i];
+        5:   63:		if(card == copper || card == silver || card == gold) {
+        4:   64:			og_treasure_count++;
+        -:   65:		}
+        -:   66:	}
+        -:   67:
+        1:   68:	printf("\nPlayer_0 gains 2 treasure cards\n");
+        1:   69:	assertTrue(og_treasure_count+2,treasure_count);
+        -:   70:
+        1:   71:	printf("\nNo change to victory card piles\n");
+        1:   72:	printf("Province pile\n");
+        1:   73:	assertTrue(state.supplyCount[province],og_state.supplyCount[province]);
+        1:   74:	printf("Duchy pile\n");
+        1:   75:	assertTrue(state.supplyCount[duchy],og_state.supplyCount[duchy]);
+        1:   76:	printf("Estate pile\n");
+        1:   77:	assertTrue(state.supplyCount[estate],og_state.supplyCount[estate]);
+        -:   78:
+        1:   79:	printf("\nNo changes to kingdom card piles\n");
+       11:   80:	for (i = 0; i < 10; i++) {
+       10:   81:		printf("Checking card piles...\n");
+       10:   82:		assertTrue(state.supplyCount[k[i]], og_state.supplyCount[k[i]]);
+        -:   83:	}
+        -:   84:
+        1:   85:	printf("\nPlayer_1 was not affected\n");
+        1:   86:	printf("Hand count\n");
+        1:   87:	assertTrue(state.handCount[player_1],og_state.handCount[player_1]);
+        1:   88:	printf("Deck count\n");
+        1:   89:	assertTrue(state.deckCount[player_1],og_state.handCount[player_1]);
+        -:   90:
+        1:   91:	if(failure_count) {
+        1:   92:		printf("\nTest: Fail\n");
+        1:   93:		printf("Failures: %d\n", failure_count);
+        -:   94:	}
+        -:   95:	else {
+    #####:   96:		printf("\nTest: Passed and Completed\n\n");
+        -:   97:	}
+        -:   98:
+        1:   99:	return 0;
+        -:  100:}

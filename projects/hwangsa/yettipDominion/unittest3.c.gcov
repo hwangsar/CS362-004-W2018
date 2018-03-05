@@ -1,0 +1,101 @@
+        -:    0:Source:unittest3.c
+        -:    0:Graph:unittest3.gcno
+        -:    0:Data:unittest3.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include "dominion.h"
+        -:    2:#include "dominion_helpers.h"
+        -:    3:#include "rngs.h"
+        -:    4:#include <string.h>
+        -:    5:#include <assert.h>
+        -:    6:#include <stdio.h>
+        -:    7:
+        -:    8:int failure_count = 0;
+        -:    9:
+        6:   10:void assertTrue(int a, int b) {
+        6:   11:	if (a == b) {
+        6:   12:		printf("Test: Pass\n");
+        -:   13:	}
+        -:   14:	else {
+    #####:   15:		printf("Test: Fail\n");
+    #####:   16:		failure_count++;
+        -:   17:	}
+        6:   18:}
+        -:   19:
+        1:   20:int main() {
+        -:   21:	int i;
+        1:   22:	int num_players = 2;
+        1:   23:	int player = 0;
+        -:   24:
+        -:   25:	// kingdom cards
+        1:   26:	int k[10] = {adventurer, council_room, feast, gardens, mine, remodel, smithy, village, baron, great_hall};
+        1:   27:	int seed = 2000;
+        -:   28:	struct gameState state;
+        -:   29:	int handCount;
+        1:   30:	int bonus = 1;
+        -:   31:
+        -:   32:	int coppers[MAX_HAND];
+        -:   33:	int silvers[MAX_HAND];
+        -:   34:	int golds[MAX_HAND];
+        -:   35:
+        -:   36:	// arrays of treasures
+      501:   37:	for (i = 0; i < MAX_HAND; i++) {
+      500:   38:		coppers[i] = copper;
+      500:   39:		silvers[i] = silver;
+      500:   40:		golds[i] = gold;
+        -:   41:	}
+        -:   42:
+        1:   43:	printf("Testing: updateCoins()");
+        -:   44:
+        -:   45:	// test the function updateCoins() to see how it handles treasures, different bonus and hand count
+        3:   46:	for(handCount = 0; handCount <= 5; handCount = handCount + 5) {
+        2:   47:		printf("\n\nTreasure cards: %d\n", handCount);
+        2:   48:		printf("Bonus: %d\n", bonus);
+        -:   49:
+        2:   50:		memset(&state,23,sizeof(struct gameState));
+        2:   51:		initializeGame(num_players, k, seed, &state);
+        2:   52:		state.handCount[player] = handCount;
+        -:   53:
+        -:   54:		// fill hand with copper
+        2:   55:		memcpy(state.hand[player],coppers,sizeof(int)*handCount);
+        2:   56:		updateCoins(player,&state,bonus);
+        -:   57:
+        2:   58:		printf("\nCoin count: Copper\n");
+        2:   59:		printf("Actual: %d\n", state.coins);
+        2:   60:		printf("Expected: %d\n", handCount*1+bonus);
+        -:   61:
+        2:   62:		assertTrue(state.coins,handCount*1+bonus);
+        -:   63:
+        -:   64:		// fill hand with silver
+        2:   65:		memcpy(state.hand[player],silvers,sizeof(int)*handCount);
+        2:   66:		updateCoins(player,&state,bonus);
+        -:   67:
+        2:   68:		printf("\nCoin count: Silver\n");
+        2:   69:		printf("Actual: %d\n", state.coins);
+        2:   70:		printf("Expected: %d\n", handCount*2+bonus);
+        -:   71:
+        2:   72:		assertTrue(state.coins, handCount*2+bonus);
+        -:   73:
+        -:   74:		// fill hand with gold
+        2:   75:		memcpy(state.hand[player],golds,sizeof(int)*handCount);
+        2:   76:		updateCoins(player,&state,bonus);
+        -:   77:
+        2:   78:		printf("\nCoin count: Gold\n");
+        2:   79:		printf("Actual: %d\n", state.coins);
+        2:   80:		printf("Expected: %d\n", handCount*3+bonus);
+        -:   81:
+        2:   82:		assertTrue(state.coins,handCount*3+bonus);
+        -:   83:
+        2:   84:		bonus = bonus + 2;
+        -:   85:	}
+        -:   86:
+        1:   87:	if(failure_count) {
+    #####:   88:		printf("\nTest: Fail\n");
+    #####:   89:		printf("Failures: %d\n", failure_count);
+        -:   90:	}
+        -:   91:	else {
+        1:   92:		printf("\nTest: Passed and Completed\n\n");
+        -:   93:	}
+        -:   94:
+        1:   95:	return 0;
+        -:   96:}
