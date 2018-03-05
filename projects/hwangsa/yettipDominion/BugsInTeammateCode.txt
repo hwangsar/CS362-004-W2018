@@ -1,0 +1,62 @@
+The first bug that was found was in the smithyCard function. With the for loop, it should be i < 3; 
+Peter introduced a bug to make it i <= 3, which resulted in the player failing to gain three cards. 
+
+The second bug detected in smithyCard was the reversed handPos and currentPlayer within the discardCard 
+function. My card test for the smithy card checked to make sure the player gained cards from his own pile; 
+as the aforementioned variables were switched, this resulted in the current player not gaining cards from 
+his pile.
+
+void smithyCard(int currentPlayer, int handPos, struct gameState *state) {
+	//+3 Cards
+	int i;
+	// THIS BUG WAS FOUND
+// TODO introduced bug: added <= instead of <
+	for (i = 0; i <= 3; i++) {
+		drawCard(currentPlayer, state);
+	}
+
+	// THIS BUG WAS FOUND
+	// TODO introduced bug: reversed handPos and currentPlayer
+	discardCard(currentPlayer, handPos, state, 0);
+}
+
+The third bug detected was in adventurerCard. The while loop was changed to increase the Treasures for 
+Adventurer from two to four; my card test found that the player wasn’t gaining two cards and was not 
+gaining two treasure cards, which was the exact bug that was introduced by Peter. 
+
+The fourth bug found was also in the adventurerCard function, where the treasure count was wrong due to 
+Peter introducing a bug where the card drawn was not checked to be silver or gold – this meant that the 
+card would only be checked to be copper, ignoring two other treasure types. 
+
+The last bug that was found was the deck count of the player being incorrect, which is a result of the 
+aforementioned bugs.
+
+void adventurerCard(int currentPlayer, struct gameState *state) {
+	int drawnTreasure = 0;
+	int cardDrawn;
+	int counterForTempHand = 0;
+	int tempHand[MAX_HAND];// moved above the if statement
+
+	// THIS BUG WAS FOUND
+// TODO introduced bug: increased Treasure size for Adventurer from 2 to 4
+	while (drawnTreasure < 4) {
+		if (state->deckCount[currentPlayer] < 1) {//if the deck is empty we need to shuffle discard and add to deck
+			shuffle(currentPlayer, state);
+		}
+		drawCard(currentPlayer, state);
+		cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer] - 1];//top card of hand is most recently drawn card.
+		// THIS BUG WAS FOUND
+// TODO introduced bug: not checking for silver or gold card
+		if (cardDrawn == copper /**|| cardDrawn == silver || cardDrawn == gold**/)
+			drawnTreasure++;
+		else {
+			tempHand[counterForTempHand] = cardDrawn;
+			state->handCount[currentPlayer]--; //this should just remove the top card (the most recently drawn one).
+			counterForTempHand++;
+		}
+	}
+	while (counterForTempHand - 1 >= 0) {
+		state->discard[currentPlayer][state->discardCount[currentPlayer]++] = tempHand[counterForTempHand - 1]; // discard all cards in play that have been drawn
+		counterForTempHand = counterForTempHand - 1;
+	}
+}
